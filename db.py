@@ -38,6 +38,13 @@ class DB():
         self.conn.commit()
         return
 
+
+    def modify_user(self, id, data):
+        self.cursor.execute("UPDATE Users SET name=?, age=? WHERE id = ?", (id,data["name"], data["age"]))
+        self.conn.commit()
+        return
+
+
 if __name__ == "__main__":
     db = DB()
     db.init_db()

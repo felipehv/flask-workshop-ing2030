@@ -88,7 +88,7 @@ def users_id(id):
 
     elif request.method == "PATCH":
         data = request.get_json(force=True)
-        db.modify_user(id)
+        db.modify_user(id, data)
         status = 200
 
     resp = Response(json.dumps(result), status=status, mimetype='application/json')
