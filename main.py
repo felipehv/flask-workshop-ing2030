@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, send_from_directory, render_template
+from flask import Flask, request, Response
 from flask_cors import CORS, cross_origin
 # Jsonify lib
 import json
@@ -13,7 +13,6 @@ CORS(app) # Evita problemas de cross_origin
 def hello_world():
     return "Hello world"
 
-
 @app.route("/hello_world_json")
 def hello_world_json():
 
@@ -24,7 +23,6 @@ def hello_world_json():
     resp.headers['Access-Control-Allow-Origin'] = '*'
 
     return resp
-
 
 @app.route("/hello_world/<argument>")
 def hello_world_argument(argument):
@@ -47,7 +45,7 @@ def ruta():
 
     elif request.method == "POST":
         result = 'POST method is allowed :)'
-        status = 200
+        status = 201
 
     resp = Response(json.dumps(result), status=status, mimetype='application/json')
     resp.headers['Access-Control-Allow-Origin'] = '*'
@@ -78,7 +76,7 @@ def users():
     return resp
 
 
-@app.route("/users/<id>", methods = ["GET", "PATCH"])
+@app.route("/users/<id>", methods = ["GET", "PATCH", "DELETE"])
 def users_id(id):
 
     if request.method == "GET":
@@ -87,15 +85,39 @@ def users_id(id):
         status = 200
 
     elif request.method == "PATCH":
+        db = DB()
         data = request.get_json(force=True)
         db.modify_user(id, data)
+        result = 'Ok'
         status = 200
+
+    elif request.method == "DELETE":
+        db = DB()
+        result = db.delete_user(id)
+        status = 203
 
     resp = Response(json.dumps(result), status=status, mimetype='application/json')
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
+@app.route("/users/<id>/notebooks", methods = ["GET", "POST"])
+def user_notebooks(id):
+    if request.method == "GET":
+        db = DB() 
+        result = db.get_all_notebooks(id)   
+        status = 200
+
+    elif request.method == "POST":
+        db = DB()
+        params = request.get_json(force=True)
+        result = db.create_notebook(id, params)
+        status = 201
+    
+    resp = Response(json.dumps(result), status=status, mimetype='application/json')
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 
 if __name__ == "__main__":
     app.run(debug = True, host='0.0.0.0')
+    # 127.0.0.1

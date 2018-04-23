@@ -1,4 +1,4 @@
 import requests
 
-req1 = requests.post('http://localhost:5000/users', json = {"name": "Jesus", "age":"42"})
+req1 = requests.post('http://localhost:5000/users/2/notebooks', json = {"brand": "dell"} )
 print(req1.text)

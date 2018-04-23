@@ -1,6 +1,6 @@
 import sqlite3
 
-class DB():
+class DB:
 
     def __init__(self):
         self.conn = sqlite3.connect("ing2030.db")
@@ -13,12 +13,19 @@ class DB():
         self.cursor.execute("""
             CREATE TABLE Users(id integer primary key autoincrement, name, age);
             """)
+        self.cursor.execute("""
+        CREATE TABLE Notebooks(id integer primary key autoincrement, brand, user_id);
+        """)
         self.conn.commit()
 
 
     def get_all_users(self):
         query = self.cursor.execute("SELECT * FROM Users;")
         return {"users" : [row for row in query] }
+
+    def get_all_notebooks(self, user_id):
+        query = self.cursor.execute("SELECT * FROM Notebooks WHERE user_id=?;", (user_id,) )
+        return {"notebooks" : [row for row in query] }
 
 
     def get_user_by_id(self, id):
@@ -38,11 +45,22 @@ class DB():
         self.conn.commit()
         return
 
+    def create_notebook(self, user_id, params):
+        self.cursor.execute("""
+            INSERT INTO Notebooks VALUES(null, ?, ?);
+        """, (params['brand'], user_id))
+        self.conn.commit()
+
 
     def modify_user(self, id, data):
-        self.cursor.execute("UPDATE Users SET name=?, age=? WHERE id = ?", (id,data["name"], data["age"]))
+        self.cursor.execute("UPDATE Users SET name=?, age=? WHERE id = ?", (data["name"], data["age"],id))
         self.conn.commit()
         return
+
+    def delete_user(self, id):
+        self.cursor.execute("DELETE FROM Users WHERE id=?", (id,) )
+        self.conn.commit()
+        return "Se ha eliminado el usuario {}".format(id)
 
 
 if __name__ == "__main__":
