@@ -13,9 +13,11 @@ class DB:
         self.cursor.execute("""
             CREATE TABLE Users(id integer primary key autoincrement, name, age);
             """)
+        self.conn.commit()
         self.cursor.execute("""
-        CREATE TABLE Notebooks(id integer primary key autoincrement, brand, user_id);
+        CREATE TABLE Phones(id integer primary key autoincrement, number, brand, carrier, user_id);
         """)
+        
         self.conn.commit()
 
 
@@ -23,16 +25,27 @@ class DB:
         query = self.cursor.execute("SELECT * FROM Users;")
         return {"users" : [row for row in query] }
 
-    def get_all_notebooks(self, user_id):
-        query = self.cursor.execute("SELECT * FROM Notebooks WHERE user_id=?;", (user_id,) )
-        return {"notebooks" : [row for row in query] }
+    def get_phones_by_user_id(self, id):
+        query = self.cursor.execute("""
+            SELECT * FROM Phones WHERE user_id = ?;
+        """, (id,) )
+        return {"phones" : [row for row in query] , "user_id": id}
 
+    def create_phone(self, id, data):
+        query = self.cursor.execute('''
+        INSERT INTO Phones 
+        VALUES (null,?,?,?,?);''', 
+        (data['number'], data['brand'], data['carrier'], id))
+        
+        self.conn.commit()
+        return 'ok'
 
     def get_user_by_id(self, id):
         query = self.cursor.execute("SELECT name,age FROM Users WHERE id=?;", (id,))
         try:
             user = query.fetchone()
-            return {"user": 
+            return {
+                    "user": 
                         {"name": user[0],
                         "age": user[1]}
                     }
@@ -40,8 +53,12 @@ class DB:
         except:
             return {"error": "User not found"}
 
+
+
+
+
     def create_user(self, data):
-        self.cursor.execute("INSERT INTO Users VALUES (null,?,?)",(data['name'], int(data['age'])) )
+        self.cursor.execute("INSERT INTO Users VALUES (null,?,?)", (data['name'], int(data['age']))  )
         self.conn.commit()
         return
 

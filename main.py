@@ -13,14 +13,16 @@ CORS(app) # Evita problemas de cross_origin
 def hello_world():
     return "Hello world"
 
-@app.route("/hello_world_json")
+
+
+
+@app.route("/hello_json")
 def hello_world_json():
 
     result = {"hello": "world"}
     status = 200
     
     resp = Response(json.dumps(result), status=status, mimetype='application/json')
-    resp.headers['Access-Control-Allow-Origin'] = '*'
 
     return resp
 
@@ -31,9 +33,13 @@ def hello_world_argument(argument):
     status = 200
     
     resp = Response(json.dumps(result), status=status, mimetype='application/json')
-    resp.headers['Access-Control-Allow-Origin'] = '*'
 
     return resp
+
+
+
+
+
 
 
 @app.route("/methods", methods = ["GET", "POST"])
@@ -48,7 +54,6 @@ def ruta():
         status = 201
 
     resp = Response(json.dumps(result), status=status, mimetype='application/json')
-    resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
 
@@ -66,7 +71,7 @@ def users():
 
     elif request.method == "POST":
         db = DB()
-        data = request.get_json(force=True)
+        data = request.get_json()
         result = db.create_user(data)
         status = 201
         db.conn.close()
@@ -76,7 +81,7 @@ def users():
     return resp
 
 
-@app.route("/users/<id>", methods = ["GET", "PATCH", "DELETE"])
+@app.route("/users/<id>", methods = ["GET", "PATCH"])
 def users_id(id):
 
     if request.method == "GET":
@@ -91,32 +96,30 @@ def users_id(id):
         result = 'Ok'
         status = 200
 
-    elif request.method == "DELETE":
-        db = DB()
-        result = db.delete_user(id)
-        status = 203
 
     resp = Response(json.dumps(result), status=status, mimetype='application/json')
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
-@app.route("/users/<id>/notebooks", methods = ["GET", "POST"])
-def user_notebooks(id):
-    if request.method == "GET":
-        db = DB() 
-        result = db.get_all_notebooks(id)   
+@app.route('/users/<id>/phones', methods=['GET', 'POST'])
+def user_phones(id):
+    
+    if request.method == 'GET':
+        db = DB()
+        result = db.get_phones_by_user_id(id)
         status = 200
+        db.conn.close()
 
     elif request.method == "POST":
         db = DB()
-        params = request.get_json(force=True)
-        result = db.create_notebook(id, params)
+        data = request.get_json()
+        result = db.create_phone(id, data)
+        db.conn.close()
         status = 201
-    
-    resp = Response(json.dumps(result), status=status, mimetype='application/json')
-    resp.headers['Access-Control-Allow-Origin'] = '*'
-    return resp
 
+
+    resp = Response(json.dumps(result), status=status, mimetype='application/json')
+    return resp
 
 if __name__ == "__main__":
     app.run(debug = True, host='0.0.0.0')
